@@ -29,6 +29,21 @@ class UrlTest extends TestCase
             $this->getCollectionMainResponseKeys()
         );
 
+        $response->assertJsonStructure([
+            'data' => [
+                'items' => [
+                    '*' => [
+                        'id',
+                        'origin_url',
+                        'short_code',
+                        'short_url',
+                        'views_count',
+                        'expires_at',
+                    ],
+                ],
+            ],
+        ]);
+
         $this->assertCount(5, $response->json('data.items'));
     }
 
@@ -52,8 +67,6 @@ class UrlTest extends TestCase
                 'views_count',
                 'expires_at',
             ],
-            'message',
-            'errors',
         ]);
 
         $response->assertJson([
@@ -64,6 +77,45 @@ class UrlTest extends TestCase
             'id' => $response->json('data.id'),
             'user_id' => $this->user->id,
             'origin_url' => 'https://google.com',
+        ]);
+    }
+
+    public function test_user_can_visit_short_url(): void
+    {
+        $url = Url::factory()->create();
+
+        $response = $this->getJson(
+            $this->apiUri("{$this->baseUri}/{$url->short_code}/visit")
+        );
+
+        $response->assertOk();
+
+        $response->assertJsonStructure([
+            'data' => [
+                'destination_url',
+            ],
+        ]);
+
+        $this->assertDatabaseHas(Url::class, [
+            'id' => $url->id,
+            'views_count' => 1,
+        ]);
+    }
+
+    public function test_user_cannot_visit_expired_short_url(): void
+    {
+        $url = Url::factory()
+            ->expired()
+            ->create();
+
+        $response = $this->getJson(
+            $this->apiUri("{$this->baseUri}/{$url->short_code}/visit")
+        );
+
+        $response->assertNotFound();
+
+        $response->assertJson([
+            'message' => 'Short URL is no longer valid.',
         ]);
     }
 
