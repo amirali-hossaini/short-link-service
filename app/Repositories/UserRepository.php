@@ -13,13 +13,13 @@ class UserRepository implements UserRepositoryInterface
         return User::create($data->toArray());
     }
 
-    public function findBy(string $col, mixed $value): ?User
+    public function findBy(string $column, mixed $value): ?User
     {
-        return User::firstWhere($col, $value);
+        return User::firstWhere($column, $value);
     }
 
-    public function existsBy(string $col, mixed $value): bool
+    public function existsBy(string $column, mixed $value): bool
     {
-        return User::where($col, $value)->exists();
+        return User::where($column, $value)->exists();
     }
 }
