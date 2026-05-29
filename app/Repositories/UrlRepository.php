@@ -38,4 +38,18 @@ class UrlRepository implements UrlRepositoryInterface
     {
         return Url::where($column, $value)->exists();
     }
+
+    public function isValid(Url $url): bool
+    {
+        if ($url->expires_at && $url->expires_at->isPast()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function update(Url $url, array $data): bool
+    {
+        return $url->update($data);
+    }
 }

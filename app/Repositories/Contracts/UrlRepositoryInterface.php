@@ -17,4 +17,8 @@ interface UrlRepositoryInterface
     public function findByUserAndOriginUrl(int $userId, string $originUrl): ?Url;
 
     public function existsBy(string $column, mixed $value): bool;
+
+    public function isValid(Url $url): bool;
+
+    public function update(Url $url, array $data): bool;
 }
