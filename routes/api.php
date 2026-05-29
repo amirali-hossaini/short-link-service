@@ -11,6 +11,8 @@ Route::prefix('auth')->name('auth.')->controller(AuthController::class)->group(f
 
 });
 
+Route::get('urls/{url:short_code}/visit', [UrlController::class, 'visit'])->name('urls.visit');
+
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('urls', UrlController::class)->except(['show']);

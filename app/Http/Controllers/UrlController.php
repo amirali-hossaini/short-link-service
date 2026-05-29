@@ -28,6 +28,30 @@ class UrlController extends Controller
             ->successResponse();
     }
 
+    public function visit(Url $url): JsonResponse
+    {
+        if (! $this->repository->isValid($url)) {
+            return $this
+                ->message('Short URL is no longer valid.')
+                ->notFoundResponse();
+        }
+
+        $this->repository->update(
+            $url,
+            [
+                'views_count' => $url->views_count + 1,
+            ],
+        );
+
+        $url->refresh();
+
+        return $this
+            ->data([
+                'destination_url' => $url->origin_url,
+            ])
+            ->successResponse();
+    }
+
     public function store(StoreUrlRequest $request): JsonResponse
     {
         $payload = $request->validated();
