@@ -121,6 +121,73 @@ class UrlTest extends TestCase
         ]);
     }
 
+    public function test_user_can_create_short_url_with_alias(): void
+    {
+        $response = $this->postJson(
+            $this->apiUri($this->baseUri),
+            [
+                'origin_url' => 'https://google.com',
+                'alias' => 'google',
+            ],
+        );
+
+        $response->assertCreated();
+
+        $response->assertJsonPath('data.short_code', 'google');
+
+        $this->assertDatabaseHas(Url::class, [
+            'user_id' => $this->user->id,
+            'origin_url' => 'https://google.com',
+            'short_code' => 'google',
+        ]);
+    }
+
+    public function test_user_can_update_short_url_alias(): void
+    {
+        $url = Url::factory()
+            ->user($this->user->id)
+            ->create([
+                'short_code' => 'old-alias',
+            ]);
+
+        $response = $this->putJson(
+            $this->apiUri("{$this->baseUri}/{$url->id}"),
+            [
+                'alias' => 'new-alias',
+            ],
+        );
+
+        $response->assertOk();
+
+        $response->assertJsonPath('data.short_code', 'new-alias');
+
+        $this->assertDatabaseHas(Url::class, [
+            'id' => $url->id,
+            'short_code' => 'new-alias',
+        ]);
+    }
+
+    public function test_users_cannot_use_same_alias(): void
+    {
+        Url::factory()->create([
+            'short_code' => 'google',
+        ]);
+
+        $response = $this->postJson(
+            $this->apiUri($this->baseUri),
+            [
+                'origin_url' => 'https://google.com',
+                'alias' => 'google',
+            ],
+        );
+
+        $response->assertUnprocessable();
+
+        $response->assertJsonValidationErrors([
+            'alias',
+        ]);
+    }
+
     public function test_user_can_update_short_url(): void
     {
         $url = Url::factory()->user($this->user->id)->create();
