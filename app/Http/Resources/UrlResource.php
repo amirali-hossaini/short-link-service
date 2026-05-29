@@ -15,7 +15,7 @@ class UrlResource extends JsonResource
             'short_code' => $this->short_code,
             'short_url' => url($this->short_code),
             'views_count' => $this->views_count,
-            'expires_at' => $this->expires_at,
+            'expires_at' => $this->expires_at?->toISOString(),
         ];
     }
 }

@@ -53,6 +53,7 @@ class UrlTest extends TestCase
             $this->apiUri($this->baseUri),
             [
                 'origin_url' => 'https://google.com',
+                'expires_at' => now()->addMonth()->toDateString(),
             ],
         );
 
@@ -77,6 +78,7 @@ class UrlTest extends TestCase
             'id' => $response->json('data.id'),
             'user_id' => $this->user->id,
             'origin_url' => 'https://google.com',
+            'expires_at' => now()->startOfDay()->addMonth()->toDateTimeString(),
         ]);
     }
 
@@ -127,6 +129,7 @@ class UrlTest extends TestCase
             $this->apiUri("{$this->baseUri}/{$url->id}"),
             [
                 'origin_url' => 'https://github.com',
+                'expires_at' => now()->addYear()->toDateString(),
             ],
         );
 
@@ -139,6 +142,7 @@ class UrlTest extends TestCase
         $this->assertDatabaseHas(Url::class, [
             'id' => $url->id,
             'origin_url' => 'https://github.com',
+            'expires_at' => now()->startOfDay()->addYear()->toDateTimeString(),
         ]);
     }
 
